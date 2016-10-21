@@ -1,0 +1,33 @@
+{
+  "name": "@samelie/chewb-redis",
+  "description": "",
+  "homepage": "https://github.com/samelie/chewb-redis",
+  "author": "Sam Elie <sam@add.dog>",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samelie/chewb-redis.git",
+    "web": "https://github.com/samelie/chewb-redis/"
+  },
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "lodash": "^4.16.3",
+    "redis": "^2.6.2"
+  },
+  "engines": {
+    "node": ">=6.7.0"
+  },
+  "keywords": [
+  ],
+  "bugs": {
+    "url": "https://github.com/samelie/chewb-redis/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  ]
+}
