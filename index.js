@@ -4,13 +4,12 @@ const Q = require('bluebird');
 
 let YoutubeApi = require('./youtube_api')
 
-const REDIS = (() => {
+/*const REDIS = (() => {
 
-    /*
-    redis options
-    */
   return new YoutubeApi(null)
 
-})()
+})()*/
 
-module.exports = REDIS
+module.exports = {
+  youtube:YoutubeApi
+}

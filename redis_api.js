@@ -7,7 +7,7 @@ Q.promisifyAll(redis.Multi.prototype);
 
 class REDIS_API {
 
-    constructor(options) {
+    constructor(options = {}) {
       this.client = redis.createClient(options);
       this.client.on("error", (err) => {
         console.log("Error " + err);
@@ -15,6 +15,8 @@ class REDIS_API {
     }
 
     hmset(key, value) {
+      console.log(key, value);
+
       return this.client.hmsetAsync(key, value)
     }
     hmget(key) {

@@ -36,6 +36,9 @@ const getPlaylistItemKey = (playlistId) => {
 /*API*/
 
 class YOUTUBE_API extends RedisApi {
+  constructor(options = {}){
+    super(options)
+  }
   getSidx(key) {
     return super.hmget(key).then(data => {
       if (data) {
@@ -44,6 +47,7 @@ class YOUTUBE_API extends RedisApi {
       return data
     })
   }
+
   setSidx(key, manifestData) {
     let _d = prepareSidx(manifestData)
     return super.hmset(key, _d)
@@ -77,7 +81,7 @@ class YOUTUBE_API extends RedisApi {
     })
   }
 
-  
+
   /*
   Must be within a playlist,
 
