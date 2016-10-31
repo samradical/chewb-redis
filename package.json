@@ -3,7 +3,7 @@
   "description": "",
   "homepage": "https://github.com/samelie/chewb-redis",
   "author": "Sam Elie <sam@add.dog>",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/samelie/chewb-redis.git",
@@ -19,8 +19,7 @@
   "engines": {
     "node": ">=6.7.0"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "bugs": {
     "url": "https://github.com/samelie/chewb-redis/issues"
   },
