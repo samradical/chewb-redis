@@ -35,15 +35,15 @@ const getPlaylistItemKey = (playlistId) => {
   return `${PLAYLIST_KEY}:${playlistId}:items`
 }
 
-const successCode = ()=>({code:200})
+const successCode = () => ({ code: 200 })
 
-const hasFoundData = (data)=>{
-  if(!data){
+const hasFoundData = (data) => {
+  if (!data) {
     return false
   }
 
   //sent from rad-redis
-  if(data.code === 404){
+  if (data.code === 404) {
     return false
   }
 
@@ -67,25 +67,25 @@ class YOUTUBE_API extends RedisApi {
     let _key = this._prependProjectKey(key)
     console.log("Getting SIDX", _key);
     return super.hmget(_key)
-    .then(data => {
-      console.log("Got SIDX");
-      if (hasFoundData(data)) {
-        data.sidx = JSON.parse(data.sidx)
-      }else{
-        throw new Error(`No SIDX found for ${_key}`)
-      }
-      return data
-    })
+      .then(data => {
+        console.log("Got SIDX");
+        if (hasFoundData(data)) {
+          data.sidx = JSON.parse(data.sidx)
+        } else {
+          throw new Error(`No SIDX found for ${_key}`)
+        }
+        return data
+      })
   }
 
   setSidx(key, manifestData) {
     let _d = prepareSidx(manifestData)
     let _key = this._prependProjectKey(key)
-    return this._deleteExisting(_key).then(() => {
-      super.hmset(_key, _d)
-    }).then(() => {
-      return successCode()
-    })
+      //return this._deleteExisting(_key).then(() => {
+    return super.hmset(_key, _d)
+      .then(() => {
+        return successCode()
+      })
   }
 
   setIndexRange(key, range) {
@@ -98,7 +98,10 @@ class YOUTUBE_API extends RedisApi {
     */
   setYoutubePlaylistItems(playlistId, playlistrawYoutubeData) {
     let _key = this._prependProjectKey(PLAYLISTS_KEY)
-    return this._deleteExisting(_key).then(() => super.sadd(_key, playlistId))
+      //delete?
+      //return this._deleteExisting(_key)
+
+    return super.sadd(_key, playlistId)
       .then(() => {
         let { items } = playlistrawYoutubeData
         let _pitemKey = this._prependProjectKey(getPlaylistItemKey(playlistId))
@@ -131,7 +134,8 @@ class YOUTUBE_API extends RedisApi {
 
   setUploadedVideoPlaylist(playlistId, reportData, playlistData = []) {
     let _key = this._prependProjectKey(UPLOADED_KEY)
-    return this._deleteExisting(_key).then(() => super.sadd(UPLOADED_KEY, playlistId))
+      //return this._deleteExisting(_key)
+    return super.sadd(UPLOADED_KEY, playlistId)
       .then(() => {
         //simple list of all the uploaded titles
         let _uploadTitlesKey = this._prependProjectKey(`${UPLOADED_TITLES_KEY}`)

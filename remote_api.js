@@ -7,6 +7,7 @@ const Request = (url, body) => {
   let isJson = (typeof body === 'object')
 
   console.log('\t',url);
+  console.log('\t',body);
 
   return R(url, {
     method: 'POST',
