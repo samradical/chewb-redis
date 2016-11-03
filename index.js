@@ -1,15 +1,8 @@
-const redis = require('redis');
-const _ = require('lodash');
-const Q = require('bluebird');
 
+let RedisApi = require('./redis_api')
 let YoutubeApi = require('./youtube_api')
 
-/*const REDIS = (() => {
-
-  return new YoutubeApi(null)
-
-})()*/
-
 module.exports = {
+  redis:RedisApi,
   youtube:YoutubeApi
 }
