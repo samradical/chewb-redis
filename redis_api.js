@@ -43,6 +43,7 @@ class REDIS_API {
     })
   }
   del(key) {
+    console.log("del()");
     return this.client.delAsync(key)
   }
 
