@@ -2,6 +2,9 @@ const xhr = require('xhr-request')
 const Q = require('bluebird')
 const R = Q.promisify(xhr);
 
+/*
+Communicate with @samelie/rad-redis
+*/
 
 const RemoteApi = function(options) {
 
@@ -27,12 +30,16 @@ const RemoteApi = function(options) {
     })
   }
 
-  const _hgetallAsync = (url, key) => {
-    return Request(`${url}hmget`, { key: key })
+  const _hmgetAsync = (url, key,field) => {
+    return Request(`${url}hmget`, { key: key ,field:field})
   }
 
-  const _hmsetAsync = (url, key, value) => {
-    return Request(`${url}hmset`, { key: key, value: value })
+  const _hgetallAsync = (url, key) => {
+    return Request(`${url}hgetAll`, { key: key })
+  }
+
+  const _hmsetAsync = (url, key,field, value) => {
+    return Request(`${url}hmset`, { key: key,field:field, value: value })
   }
 
   const _hsetAsync = (url, key, field, value) => {
@@ -74,9 +81,14 @@ const RemoteApi = function(options) {
   }
 
   //pair
-  function hmget(key) {
-    return _hgetallAsync(host, key)
+  function hmget(key,field) {
+    return _hmgetAsync(host, key,field)
   }
+  function hmgetAsync(key,field) {
+    return _hmgetAsync(host, key,field)
+  }
+
+
 
   function hgetallAsync(key) {
     return _hgetallAsync(host, key)
@@ -91,12 +103,12 @@ const RemoteApi = function(options) {
     return _hsetAsync(host, key, field, val)
   }
   //pair
-  function hmset(key, val) {
-    return _hmsetAsync(host, key, val)
+  function hmset(key, field, val) {
+    return _hmsetAsync(host, key, field, val)
   }
 
-  function hmsetAsync(key, val) {
-    return _hmsetAsync(host, key, val)
+  function hmsetAsync(key, field, val) {
+    return _hmsetAsync(host, key, field, val)
   }
 
   //pair

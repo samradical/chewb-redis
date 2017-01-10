@@ -1,6 +1,8 @@
 let RedisApi = require('./redis_api')
 const Q = require('bluebird');
 const _ = require('lodash');
+const colors = require('colors');
+const check = require('check-types');
 
 let SIDX_VO = {
   itag: null,
@@ -11,6 +13,7 @@ let SIDX_VO = {
   container: 'mp4',
 }
 
+const SIDX_KEY = 'sidx'
 const PLAYLISTS_KEY = 'playlists'
 const PLAYLIST_KEY = 'playlist'
 const UPLOADED_KEY = 'uploaded'
@@ -51,25 +54,31 @@ const hasFoundData = (data) => {
 
 /*API*/
 
-class YOUTUBE_API extends RedisApi {
-  constructor(options = {}, local = true) {
-    super(options, local)
+class YOUTUBE_API {
+
+  constructor(redisClient) {
+    this.redisClient = redisClient
   }
 
   /*
   we remove the exisiting for updates
   */
   _deleteExisting(key) {
-    return super.del(key)
+    return this.redisClient.del(key)
   }
 
   getSidx(key) {
-    let _key = this._prependProjectKey(key)
-    console.log("Getting SIDX", _key);
-    return super.hmget(_key)
+    let _key = this.redisClient._prependProjectKey(key)
+    let _field = SIDX_KEY
+    console.log(colors.yellow(`@chewb-redis youtubeA-api getSidx() ${_key} ${_field}`));
+    return this.redisClient.hmget(_key, _field)
       .then(data => {
-        console.log("Got SIDX");
+        if (!check.object(data)) {
+          data = JSON.parse(data)
+        }
+
         if (hasFoundData(data)) {
+          console.log(colors.green(`\t @chewb-redis youtubeA-api getSidx() ${_key}`));
           data.sidx = JSON.parse(data.sidx)
         } else {
           throw new Error(`No SIDX found for ${_key}`)
@@ -80,10 +89,15 @@ class YOUTUBE_API extends RedisApi {
 
   setSidx(key, manifestData) {
     let _d = prepareSidx(manifestData)
-    let _key = this._prependProjectKey(key)
-      //return this._deleteExisting(_key).then(() => {
-    return super.hmset(_key, _d)
+    let _key = this.redisClient._prependProjectKey(key)
+    let _field = SIDX_KEY
+    console.log(colors.yellow(`@chewb-redis youtubeA-api setSidx() ${_key} ${_field}`));
+    if (check.object(_d)) {
+      _d = JSON.stringify(_d)
+    }
+    return this.redisClient.hmset(_key, _field, _d)
       .then(() => {
+        console.log(colors.green(`\t @chewb-redis youtubeA-api setSidx() ${_key}`));
         return successCode()
       })
   }
@@ -97,28 +111,34 @@ class YOUTUBE_API extends RedisApi {
     }
     */
   setYoutubePlaylistItems(playlistId, playlistrawYoutubeData) {
-    let _key = this._prependProjectKey(PLAYLISTS_KEY)
+    let _key = this.redisClient._prependProjectKey(PLAYLISTS_KEY)
       //delete?
       //return this._deleteExisting(_key)
-
-    return super.sadd(_key, playlistId)
+    console.log(colors.yellow(`@chewb-redis youtubeA-api setYoutubePlaylistItems() ${_key}`));
+    return this.redisClient.sadd(_key, playlistId)
       .then(() => {
-        let { items } = playlistrawYoutubeData
-        let _pitemKey = this._prependProjectKey(getPlaylistItemKey(playlistId))
+        let { items } = playlistrawYoutubeData || {items:[]}
+        let _pitemKey = this.redisClient._prependProjectKey(getPlaylistItemKey(playlistId))
         return Q.all(items.map(item => {
-          return super.sadd(_pitemKey, JSON.stringify(item))
+          console.log(colors.green(`\t @chewb-redis youtubeA-api setYoutubePlaylistItems() ${_key}`));
+          return this.redisClient.sadd(_pitemKey, JSON.stringify(item))
         }))
       })
   }
 
   getPlaylistItems(playlistId) {
     let _pitemKey = getPlaylistItemKey(playlistId)
-    let _key = this._prependProjectKey(_pitemKey)
-    return super.smembers(_key)
+    let _key = this.redisClient._prependProjectKey(_pitemKey)
+    console.log(colors.yellow(`@chewb-redis youtubeA-api getPlaylistItems() ${_key}`));
+    return this.redisClient.smembers(_key)
       .then(items => {
+        if (!check.object(items)) {
+          items = JSON.parse(items)
+        }
         if (!items.length) {
           throw new Error(`No items for ${playlistId}`)
         } else {
+          console.log(colors.green(`\t @chewb-redis youtubeA-api getPlaylistItems() ${_key}`));
           return items.map(string => JSON.parse(string))
         }
       })
@@ -133,24 +153,24 @@ class YOUTUBE_API extends RedisApi {
   */
 
   setUploadedVideoPlaylist(playlistId, reportData, playlistData = []) {
-    let _key = this._prependProjectKey(UPLOADED_KEY)
+    let _key = this.redisClient._prependProjectKey(UPLOADED_KEY)
       //return this._deleteExisting(_key)
-    return super.sadd(UPLOADED_KEY, playlistId)
+    return this.redisClient.sadd(UPLOADED_KEY, playlistId)
       .then(() => {
         //simple list of all the uploaded titles
-        let _uploadTitlesKey = this._prependProjectKey(`${UPLOADED_TITLES_KEY}`)
-        let _reportKey = this._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:report`)
-        let _playlistItemsKey = this._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:items`)
+        let _uploadTitlesKey = this.redisClient._prependProjectKey(`${UPLOADED_TITLES_KEY}`)
+        let _reportKey = this.redisClient._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:report`)
+        let _playlistItemsKey = this.redisClient._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:items`)
           //the local files
         delete reportData.files
-        return super.sadd(_uploadTitlesKey, JSON.stringify({
+        return this.redisClient.sadd(_uploadTitlesKey, JSON.stringify({
             title: reportData.title,
             playlistId: playlistId
           }))
           .then(() => {
-            return super.sadd(_reportKey, JSON.stringify(reportData))
+            return this.redisClient.sadd(_reportKey, JSON.stringify(reportData))
               .then(() => {
-                return super.sadd(_playlistItemsKey, JSON.stringify(playlistData))
+                return this.redisClient.sadd(_playlistItemsKey, JSON.stringify(playlistData))
               })
           })
       })
@@ -161,11 +181,11 @@ class YOUTUBE_API extends RedisApi {
   */
 
   getUploadedVideoPlaylistItems(playlistId) {
-    return super.smembers(this._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:items`))
+    return this.redisClient.smembers(this.redisClient._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:items`))
   }
 
   getUploadedVideoPlaylistReport(playlistId) {
-    return super.smembers(this._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:report`))
+    return this.redisClient.smembers(this.redisClient._prependProjectKey(`${UPLOADED_KEY}:${playlistId}:report`))
   }
 }
 

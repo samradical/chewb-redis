@@ -1,7 +1,12 @@
+let YoutubeApi = require('./youtube_api')
+let UserApi = require('./user_api')
+
 const client = require('./client');
 const redis = require('redis');
 const _ = require('lodash');
 const Q = require('bluebird');
+const colors = require('colors');
+const check = require('check-types');
 
 Q.promisifyAll(redis.RedisClient.prototype);
 Q.promisifyAll(redis.Multi.prototype);
@@ -9,8 +14,13 @@ Q.promisifyAll(redis.Multi.prototype);
 class REDIS_API {
 
   constructor(options = {}, local = true) {
+    console.log(colors.green(`REDIS_API local: ${local}`));
     this.client = client(options, local)
     this.projectKey = options.project || ""
+
+    this.youtube = new YoutubeApi(this)
+    this.user = new UserApi(this)
+
   }
 
   _prependProjectKey(str) {
@@ -18,6 +28,9 @@ class REDIS_API {
   }
 
   hset(key, field, value) {
+    if (check.object(value)) {
+      value = JSON.stringify(value)
+    }
     return this.client.hsetAsync(key, field, value)
   }
 
@@ -25,10 +38,22 @@ class REDIS_API {
     return this.client.hgetallAsync(key)
   }
 
-  hmset(key, value) {
-    return this.client.hmsetAsync(key, value)
+  hmset(key, field, value) {
+    if (check.object(value)) {
+      value = JSON.stringify(value)
+    }
+    return this.client.hmsetAsync(key, field, value)
   }
-  hmget(key) {
+  hmget(key, field) {
+    return this.client.hmgetAsync(key, field)
+    .then(result=>{
+      if (check.array(result)) {
+        return result[0]
+      }
+      return result
+    })
+  }
+  hgetAll(key) {
     return this.client.hgetallAsync(key)
   }
   hremove(key, field) {
