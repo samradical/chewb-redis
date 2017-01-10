@@ -14,8 +14,9 @@
   "dependencies": {
     "bluebird": "^3.4.6",
     "check-types": "^7.0.1",
+    "colors": "^1.1.2",
     "lodash": "^4.16.3",
-    "redis": "^2.6.2",
+    "redis": "^2.6.3",
     "xhr-request": "^1.0.1"
   },
   "engines": {
@@ -30,8 +31,5 @@
       "type": "MIT",
       "url": "https://opensource.org/licenses/MIT"
     }
-  ],
-  "devDependencies": {
-    "colors": "^1.1.2"
-  }
+  ]
 }
