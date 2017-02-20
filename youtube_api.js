@@ -50,6 +50,7 @@ const hasFoundData = (data) => {
     return false
   }
 
+  return true;
 }
 
 /*API*/
@@ -67,19 +68,17 @@ class YOUTUBE_API {
     return this.redisClient.del(key)
   }
 
-  getSidx(key) {
-    let _key = this.redisClient._prependProjectKey(key)
-    let _field = SIDX_KEY
+  getSidx(field) {
+    let _key = this.redisClient._prependProjectKey('sidx')
+    let _field = field
     console.log(colors.yellow(`@chewb-redis youtubeA-api getSidx() ${_key} ${_field}`));
-    return this.redisClient.hmget(_key, _field)
+    return this.redisClient.hget(_key, _field)
       .then(data => {
         if (!check.object(data)) {
           data = JSON.parse(data)
         }
-
         if (hasFoundData(data)) {
           console.log(colors.green(`\t @chewb-redis youtubeA-api getSidx() ${_key}`));
-          data.sidx = JSON.parse(data.sidx)
         } else {
           throw new Error(`No SIDX found for ${_key}`)
         }
@@ -87,10 +86,10 @@ class YOUTUBE_API {
       })
   }
 
-  setSidx(key, manifestData) {
+  setSidx(field, manifestData) {
     let _d = prepareSidx(manifestData)
-    let _key = this.redisClient._prependProjectKey(key)
-    let _field = SIDX_KEY
+    let _key = this.redisClient._prependProjectKey('sidx')
+    let _field = field
     console.log(colors.yellow(`@chewb-redis youtubeA-api setSidx() ${_key} ${_field}`));
     if (check.object(_d)) {
       _d = JSON.stringify(_d)

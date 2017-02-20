@@ -16,18 +16,21 @@ const RemoteApi = function(options) {
     body.field = "text"
     body.value = "okay"*/
 
-    console.log();
+    console.log(JSON.stringify(body));
 
     console.log('\t', url);
     //console.log('\t', body);
 
-    //console.log(body.toString());
 
     return R(url, {
       method: 'POST',
       json: true,
       body: body
     })
+  }
+
+  const _hgetAsync = (url, key, field) => {
+    return Request(`${url}hget`, { key: key ,field:field})
   }
 
   const _hmgetAsync = (url, key,field) => {
@@ -84,10 +87,14 @@ const RemoteApi = function(options) {
   function hmget(key,field) {
     return _hmgetAsync(host, key,field)
   }
+
   function hmgetAsync(key,field) {
     return _hmgetAsync(host, key,field)
   }
 
+  function hgetAsync(key, field) {
+    return _hgetAsync(host, key, field)
+  }
 
 
   function hgetallAsync(key) {
@@ -168,6 +175,7 @@ const RemoteApi = function(options) {
     del: del,
     delAsync: delAsync,
     hmget: hmget,
+    hmgetAsync: hmgetAsync,
     hgetallAsync: hgetallAsync,
     hset: hset,
     hsetAsync: hsetAsync,

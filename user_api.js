@@ -26,11 +26,10 @@ class USER_API {
   }
 
   login(username) {
-    let _key = this.redisClient._prependProjectKey(`users:${username}`)
+    let _key = this.redisClient._prependProjectKey(`users`)
       //field username
-    let _field = 'username'
     console.log(colors.yellow(`@chewb-redis user-api login() ${_key} ${_field}`));
-    return this.redisClient.hgetAll(_key)
+    return this.redisClient.smembers(_key)
       .then(data => {
         if (!check.object(data)) {
           data = JSON.parse(data)
@@ -38,35 +37,33 @@ class USER_API {
         if (hasFoundData(data)) {
           console.log(colors.green(`\t @chewb-redis user-api login() ${_key}`));
         } else {
-          return this.redisClient.hset(_key, _field, username)
+          return this.redisClient.sadd(_key, username)
             //throw new Error(`No User found found for ${_key}`)
         }
         return data
       })
   }
 
-  _storeVideoInTotal(field, data){
+/*  _storeVideoInTotal(field, data){
     const _key = this.redisClient._prependProjectKey(`videos`)
     console.log(colors.yellow(`@chewb-redis user-api _storeVideoInTotal() ${_key} ${field} ${data}`));
     return this.redisClient.hmset(_key, field, data)
-  }
+  }*/
 
-  storeVideo(username, field, value) {
-    let _key = this.redisClient._prependProjectKey(`users:${username}:videos`)
-    this._storeVideoInTotal(field, _key).finally()
-      //field username
-    let _field = field
+  storeVideo(username, value) {
+    let _key = this.redisClient._prependProjectKey(`videos`)
+    //this._storeVideoInTotal(username, value).finally()
+    //field username
+    let _field = username
     console.log(colors.yellow(`@chewb-redis user-api storeVideo() ${_key} ${_field}`));
-    return this.redisClient.hmget(_key, _field)
+    this.redisClient.hget(_key, _field)
       .then(data => {
         data = data || {}
         if (!check.object(data)) {
           data = JSON.parse(data)
         }
-
         data = Object.assign({}, data, value)
-
-        return this.redisClient.hmset(_key, _field, data)
+        return this.redisClient.hset(_key, username, data)
       })
   }
 

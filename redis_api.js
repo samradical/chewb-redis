@@ -16,7 +16,7 @@ class REDIS_API {
   constructor(options = {}, local = true) {
     console.log(colors.green(`REDIS_API local: ${local}`));
     this.client = client(options, local)
-    this.projectKey = options.project || ""
+    this.projectKey = options.project ? `${options.project}:` : ""
 
     this.youtube = new YoutubeApi(this)
     this.user = new UserApi(this)
@@ -24,7 +24,8 @@ class REDIS_API {
   }
 
   _prependProjectKey(str) {
-    return `${this.projectKey}:${str}`
+
+    return `${this.projectKey}${str}`
   }
 
   hset(key, field, value) {
@@ -34,8 +35,8 @@ class REDIS_API {
     return this.client.hsetAsync(key, field, value)
   }
 
-  hget(key) {
-    return this.client.hgetallAsync(key)
+  hget(key, field) {
+    return this.client.hgetAsync(key, field)
   }
 
   hmset(key, field, value) {
@@ -44,6 +45,7 @@ class REDIS_API {
     }
     return this.client.hmsetAsync(key, field, value)
   }
+
   hmget(key, field) {
     return this.client.hmgetAsync(key, field)
     .then(result=>{
@@ -53,9 +55,15 @@ class REDIS_API {
       return result
     })
   }
+
+  hmgetAsync(key) {
+    return this.client.hgetallAsync(key)
+  }
+
   hgetAll(key) {
     return this.client.hgetallAsync(key)
   }
+
   hremove(key, field) {
     return new Q((yes, no) => {
       this.client.hdel(key, field, (err, success) => {
