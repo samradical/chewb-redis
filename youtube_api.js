@@ -5,7 +5,7 @@ const colors = require('colors');
 const check = require('check-types');
 
 let SIDX_VO = {
-  itag: null,
+  itags: null,
   videoId: null,
   codecs: null,
   resolution: null,
@@ -87,6 +87,7 @@ class YOUTUBE_API {
   }
 
   setSidx(field, manifestData) {
+    console.log(manifestData);
     let _d = prepareSidx(manifestData)
     let _key = this.redisClient._prependProjectKey('sidx')
     let _field = field

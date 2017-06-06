@@ -7,6 +7,9 @@ const check = require('check-types');
 const successCode = () => ({ code: 200 })
 
 const hasFoundData = (data) => {
+  if(check.array(data)){
+    return !!data.length
+  }
   if (!data) {
     return false
   }
@@ -28,18 +31,16 @@ class USER_API {
   login(username) {
     let _key = this.redisClient._prependProjectKey(`users`)
       //field username
-    console.log(colors.yellow(`@chewb-redis user-api login() ${_key} ${_field}`));
+    console.log(colors.yellow(`@chewb-redis user-api login() ${_key}`));
     return this.redisClient.smembers(_key)
       .then(data => {
-        if (!check.object(data)) {
-          data = JSON.parse(data)
-        }
         if (hasFoundData(data)) {
           console.log(colors.green(`\t @chewb-redis user-api login() ${_key}`));
         } else {
           return this.redisClient.sadd(_key, username)
             //throw new Error(`No User found found for ${_key}`)
         }
+        console.log(data);
         return data
       })
   }
