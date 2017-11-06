@@ -8,7 +8,7 @@ What is special is it can work with a local or remote redis database.
 ```
 example.js
 
-const { redis } = require('@samelie/chewb-redis');
+const { redis } = require('chewb-redis');
 
 let isLocal = process.env.REDIS_HOST === '127.0.0.1'
 
@@ -44,15 +44,6 @@ server {
 
   index index.html index.htm index.nginx-debian.html;
 
-  server_name rad.wtf;
-
-  location / {
-    try_files $uri $uri/index.html $uri.html =404;
-    index index.html index.htm;
-  }
-
-  # Requests for socket.io are passed on to Node on port 3000
-
   location ~* \.io {
       proxy_set_header X-Real-IP $remote_addr;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -75,7 +66,8 @@ server {
         proxy_set_header Host $http_host;
         proxy_set_header X-NginX-Proxy true;
 
-    #default rad-redis port is 6380
+        #default rad-redis port is 6380
+        #rad-redis will pick up POST requests and pass to REDIS db
         proxy_pass http://127.0.0.1:6380/;
         proxy_redirect off;
 
